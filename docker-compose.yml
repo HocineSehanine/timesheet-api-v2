@@ -1,0 +1,41 @@
+version: '3'
+
+networks:
+  timesheet-network:
+    driver: bridge
+
+volumes:
+  timesheet_prometheus_data:
+  timesheet_grafana_data:
+
+services:
+  db-timesheet:
+    container_name: db_timesheet
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: db_timesheet
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+  timesheet-prometheus:
+    container_name: timesheet-prometheus
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    networks:
+      - timesheet-network
+    volumes:
+      - ./config/prometheus.yml/:/etc/prometheus/prometheus.yml
+      - timesheet_prometheus_data:/prometheus
+    user: root
+
+  timesheet-grafana:
+    container_name: timesheet-grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - timesheet-network
